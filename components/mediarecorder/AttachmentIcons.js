@@ -2,36 +2,35 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import drivelogoImg from "@public/images/google-drive.png";
 import oneDrivelogoImg from "@ui-library/icons/onedrive.png";
-import { BsQuestionCircle, BsInfoCircle } from "react-icons/bs";
+import { BsInfoCircle } from "react-icons/bs";
 import Tooltip from "@ui-library/Tooltip";
 import videoIcon from "@public/svgs/videoIcon.svg";
 import authService from "@services/auth.service";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useAuthUser } from "@contexts/AuthContext";
+import answerService from "@services/answer.service";
+import { useTokens } from "@contexts/TokensContext";
 import Bus from "@utils/Bus";
 
 export default function AttachmentIcons({
   handleOpenPicker,
   setMediaParam,
   disableIcons,
-  tokenInfo,
-  setTokenInfo,
-  googleTokenObject,
-  setgoogleTokenObject,
-  microsoftTokenObject,
-  setMicrosoftTokenObject,
-  tokens,
-  refetchTokens,
+  handleAttachment,
 }) {
   const { auth } = useAuthUser();
+  const { tokens, refetchTokens } = useTokens();
+  const [externalWindowConnectToOnedrive, setExternalWindowConnectToOnedrive] =
+    useState();
+  const intervalRefConnectToOnedrive = useRef();
 
-  const [externalWindow1, setExternalWindow1] = useState();
-  const intervalRef1 = useRef();
+  const [
+    externalWindowConnectToFilePicker,
+    setExternalWindowConnectToFilePicker,
+  ] = useState();
+  const intervalRefConnectToFilePicker = useRef();
 
-  const [externalWindow2, setExternalWindow2] = useState();
-  const intervalRef2 = useRef();
-
-  const redirectURI = window.location.href;
+  const redirectURI = window.location.origin;
 
   const googleDriveVerify = useGoogleLogin({
     scope: "https://www.googleapis.com/auth/drive",
@@ -40,19 +39,8 @@ export default function AttachmentIcons({
     onSuccess: (codeResponse) => {
       authService
         .getToken(codeResponse.code)
-        .then((res) => {
+        .then(() => {
           refetchTokens();
-          let temp = {
-            isDriveAuthorize: true,
-            isTokenExpired: false,
-            tokenObject: res.data,
-          };
-          setgoogleTokenObject(temp);
-          temp = {
-            googleTokenObject: temp,
-            microsoftTokenObject: microsoftTokenObject,
-          };
-          setTokenInfo(temp);
         })
         .catch((error) => {
           Bus.emit("error", {
@@ -66,11 +54,12 @@ export default function AttachmentIcons({
     },
   });
 
-  const clearTimer1 = () => {
-    window.clearInterval(intervalRef1.current);
+  // first pop up's code is to connect to microsoft one drive
+  const clearTimerConnectToOnedrive = () => {
+    window.clearInterval(intervalRefConnectToOnedrive.current);
   };
 
-  const createPopup1 = () => {
+  const createPopupConnectToOnedrive = () => {
     const width = 500;
     const height = 500;
     const title = `WINDOW TITLE`;
@@ -85,13 +74,14 @@ export default function AttachmentIcons({
     return externalPopup;
   };
   const connectToOneDrive = () => {
-    setExternalWindow1(createPopup1());
+    setExternalWindowConnectToOnedrive(createPopupConnectToOnedrive());
   };
 
-  const clearTimer2 = () => {
-    window.clearInterval(intervalRef2.current);
+  // Second pop up's code is to connect to microsoft's file picker v8
+  const clearTimerConnectToFilePicker = () => {
+    window.clearInterval(intervalRefConnectToFilePicker.current);
   };
-  const createPopup2 = () => {
+  const createPopupConnectToFilePicker = () => {
     const width = 500;
     const height = 500;
     const title = `WINDOW TITLE`;
@@ -106,88 +96,90 @@ export default function AttachmentIcons({
     return externalPopup2;
   };
   const connectToOneDriveFilePIcker = () => {
-    setExternalWindow2(createPopup2());
+    setExternalWindowConnectToFilePicker(createPopupConnectToFilePicker());
   };
 
   useEffect(() => {
-    if (externalWindow1) {
-      intervalRef1.current = window.setInterval(() => {
+    if (externalWindowConnectToOnedrive) {
+      intervalRefConnectToOnedrive.current = window.setInterval(() => {
         try {
-          const currentUrl = externalWindow1.location.href;
+          const currentUrl = externalWindowConnectToOnedrive.location.href;
           const params = new URL(currentUrl).searchParams;
           const code = params.get("code");
           if (!code) {
             return;
           }
-          console.log("code", code);
           if (code) {
             authService
               .getMSToken(code, 1)
               .then(function (response) {
                 refetchTokens();
                 connectToOneDriveFilePIcker();
-                console.log("first api success");
               })
               .catch(function (error) {
-                console.log(error);
+                Bus.emit("error", { operation: "open", error: error.response });
               });
           }
-
-          clearTimer1();
-          externalWindow1.close();
+          clearTimerConnectToOnedrive();
+          externalWindowConnectToOnedrive.close();
         } catch (error) {
           // eslint-ignore-line
         } finally {
-          if (!externalWindow1 || externalWindow1.closed) {
-            clearTimer1();
+          if (
+            !externalWindowConnectToOnedrive ||
+            externalWindowConnectToOnedrive.closed
+          ) {
+            clearTimerConnectToOnedrive();
           }
         }
       }, 700);
     }
     return () => {
-      if (externalWindow1) externalWindow1.close();
+      if (externalWindowConnectToOnedrive)
+        externalWindowConnectToOnedrive.close();
     };
-  }, [externalWindow1]);
+  }, [externalWindowConnectToOnedrive]);
 
   useEffect(() => {
-    if (externalWindow2) {
-      intervalRef2.current = window.setInterval(() => {
+    if (externalWindowConnectToFilePicker) {
+      intervalRefConnectToFilePicker.current = window.setInterval(() => {
         try {
-          const currentUrl = externalWindow2.location.href;
+          const currentUrl = externalWindowConnectToFilePicker.location.href;
           const params = new URL(currentUrl).searchParams;
           const code = params.get("code");
           if (!code) {
             return;
           }
-          console.log("code", code);
           if (code) {
             authService
               .getMSToken(code, 2)
               .then(function (response) {
                 refetchTokens();
-
-                console.log("second api success");
               })
               .catch(function (error) {
-                console.log(error);
+                Bus.emit("error", { operation: "open", error: error.response });
               });
           }
 
-          clearTimer2();
-          externalWindow2.close();
+          clearTimerConnectToFilePicker();
+          externalWindowConnectToFilePicker.close();
         } catch (error) {
           // eslint-ignore-line
         } finally {
-          if (!externalWindow2 || externalWindow2.closed) {
-            clearTimer2();
+          if (
+            !externalWindowConnectToFilePicker ||
+            externalWindowConnectToFilePicker.closed
+          ) {
+            clearTimerConnectToFilePicker();
           }
         }
       }, 700);
     }
     return () => {
-      if (externalWindow2) externalWindow2.close();
+      if (externalWindowConnectToFilePicker)
+        externalWindowConnectToFilePicker.close();
     };
-  }, [externalWindow2]);
+  }, [externalWindowConnectToFilePicker]);
 
   const baseUrl = "https://onedrive.live.com/picker";
   let win = null;
@@ -202,7 +194,7 @@ export default function AttachmentIcons({
     },
     authentication: {},
     messaging: {
-      origin: "http://localhost:3000",
+      origin: redirectURI,
       channelId: "27",
     },
     selection: {
@@ -217,6 +209,7 @@ export default function AttachmentIcons({
     },
   };
 
+  // one drive file picker v8 implementation with message listener
   const pickerCode = () => {
     win = window.open("", "Picker", "width=1080,height=680");
 
@@ -243,32 +236,33 @@ export default function AttachmentIcons({
     win.document.body.append(form);
     form.submit();
 
-    /*window.addEventListener("message", (event) => {
-      if (event.source && event.source === win) {
-        const message = event.data;
-
-        if (
-          message.type === "initialize" &&
-          message.channelId === options.messaging.channelId
-        ) {
-          port = event.ports[0];
-
-          port.addEventListener("message", messageListener);
-
-          port.start();
-
-          port.postMessage({
-            type: "activate",
-          });
+    window.addEventListener("message", (event) => {
+      if (event.origin === 'https://onedrive.live.com') {
+        if (event.source && event.source === win) {
+          const message = event.data;
+  
+          if (
+            message.type === "initialize" &&
+            message.channelId === options.messaging.channelId
+          ) {
+            port = event.ports[0];
+  
+            port.addEventListener("message", messageListener);
+  
+            port.start();
+  
+            port.postMessage({
+              type: "activate",
+            });
+          }
         }
-      }
-    });*/
+      };
+    });
   };
 
   async function messageListener(message) {
     switch (message.data.type) {
       case "notification":
-        console.log(`notification: ${message.data}`);
         break;
 
       case "command":
@@ -298,13 +292,11 @@ export default function AttachmentIcons({
                 },
               });
             } else {
-              console.error(
-                `Could not get auth token for command: ${JSON.stringify(
-                  command
-                )}`
-              );
+              Bus.emit("error", {
+                operation: "open",
+                error: `Could not get auth token`,
+              });
             }
-
             break;
 
           case "close":
@@ -312,15 +304,36 @@ export default function AttachmentIcons({
             break;
 
           case "pick":
-            const ArrayIDs = [];
-            command.items.forEach(function (arrayItem) {
-              ArrayIDs.push(arrayItem.id);
+            let fileData = [];
+            let dataObj = [];
 
-              console.log(ArrayIDs);
+            command.items.forEach(function (arrayItem) {
+              fileData.push({ id: arrayItem.id, name: arrayItem.name });
             });
 
-            console.log(`Picked: ${JSON.stringify(command)}`);
-
+            if (fileData !== undefined && fileData.length > 0) {
+              answerService
+                .grantAccess(fileData, "Microsoft")
+                .then((res) => {
+                  res.data.forEach(function (arrayItem) {
+                    dataObj.push({
+                      id: arrayItem.id,
+                      mimeType: "onedrive",
+                      name: arrayItem.name,
+                      shareId: arrayItem.shareId,
+                    });
+                  });
+                  if (dataObj !== undefined && dataObj.length > 0) {
+                    handleAttachment(dataObj, "Microsoft");
+                  }
+                })
+                .catch((error) => {
+                  Bus.emit("error", {
+                    operation: "open",
+                    error: error.response,
+                  });
+                });
+            }
             port.postMessage({
               type: "result",
               id: message.data.id,
@@ -334,8 +347,10 @@ export default function AttachmentIcons({
             break;
 
           default:
-            console.warn(`Unsupported command: ${JSON.stringify(command)}`, 2);
-
+            Bus.emit("error", {
+              operation: "open",
+              error: `Unsupported command`,
+            });
             port.postMessage({
               result: "error",
               error: {
@@ -353,43 +368,150 @@ export default function AttachmentIcons({
   }
   return (
     <StyledAttachmentIcons>
-      {tokenInfo !== undefined &&
-      googleTokenObject?.isDriveAuthorize &&
-      !googleTokenObject?.isTokenExpired ? (
-        <div className="d-flex align-items-center wrap">
-          <Button
-            onClick={async () => {
-              setMediaParam({
-                video: true,
-                audio: true,
-                selected: "video",
-                type: "video/mp4",
-              });
-            }}
-          >
-            <img
-              src={videoIcon.src}
-              alt="videoIcon"
-              style={{
-                width: "100%",
-                height: "auto",
-                maxWidth: 20,
-                color:
-                  (googleTokenObject?.tokenObject === undefined &&
-                    !googleTokenObject?.isDriveVerfied &&
-                    !googleTokenObject?.isTokenExpired) ||
-                  !googleTokenObject?.isDriveVerfied ||
-                  disableIcons
-                    ? "#969C9D"
-                    : "#444",
+      <div className="d-flex align-items-center wrap">
+        {auth?.user?.authType == "Microsoft" &&
+          tokens !== undefined &&
+          tokens?.microsoftTokenObject?.isDriveAuthorize && (
+            <Button
+              onClick={async () => {
+                setMediaParam({
+                  video: true,
+                  audio: true,
+                  selected: "video",
+                  type: "video/mp4",
+                });
               }}
-            />
-            Record Media
-          </Button>
+            >
+              <img
+                src={videoIcon.src}
+                alt="videoIcon"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: 20,
+                  color:
+                    (tokens?.microsoftTokenObject?.tokenObject === undefined &&
+                      !tokens?.microsoftTokenObject?.isDriveAuthorize) ||
+                    disableIcons
+                      ? "#969C9D"
+                      : "#444",
+                }}
+              />
+              Record Media
+            </Button>
+          )}
 
+        {(auth?.user?.authType == "Google" ||
+          auth?.user?.authType == "Facebook") &&
+          tokens !== undefined &&
+          tokens?.googleTokenObject?.isDriveAuthorize &&
+          !tokens?.googleTokenObject?.isTokenExpired && (
+            <Button
+              onClick={async () => {
+                setMediaParam({
+                  video: true,
+                  audio: true,
+                  selected: "video",
+                  type: "video/mp4",
+                });
+              }}
+            >
+              <img
+                src={videoIcon.src}
+                alt="videoIcon"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: 20,
+                  color:
+                    (tokens?.googleTokenObject?.tokenObject === undefined &&
+                      !tokens?.googleTokenObject?.isDriveAuthorize) ||
+                    disableIcons
+                      ? "#969C9D"
+                      : "#444",
+                }}
+              />
+              Record Media
+            </Button>
+          )}
+
+        {tokens !== undefined &&
+        tokens?.googleTokenObject?.isDriveAuthorize &&
+        !tokens?.googleTokenObject?.isTokenExpired ? (
+          <>
+            <Button
+              onClick={async () => {
+                handleOpenPicker();
+                setMediaParam({
+                  video: false,
+                  audio: false,
+                  selected: "",
+                  type: "",
+                });
+              }}
+            >
+              <img
+                alt="google drive"
+                src={drivelogoImg.src}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: 20,
+                }}
+              />
+              Google Drive
+            </Button>
+
+            <Tooltip text="With Google Drive Picker you can add attachments from your Google Drive account OR drag-drop files from your device using the upload feature.">
+              <span>
+                <BsInfoCircle color="#555" size={16} />
+              </span>
+            </Tooltip>
+          </>
+        ) : (
+          <div className="wrap">
+            <Button
+              className="authButton"
+              onClick={async () => {
+                if (
+                  tokens?.googleTokenObject?.isTokenExpired &&
+                  tokens?.googleTokenObject?.isDriveVerfied
+                ) {
+                  authService
+                    .getRefreshToken(
+                      tokens?.googleTokenObject?.tokenObject?.refresh_token
+                    )
+                    .then((res) => {
+                      refetchTokens();
+                      openPickerClick();
+                    })
+                    .catch((err) => {
+                      alert(err);
+                    });
+                } else {
+                  googleDriveVerify();
+                }
+              }}
+            >
+              <img
+                alt="connect to google drive"
+                src={drivelogoImg.src}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: 20,
+                }}
+              />
+              Connect to GoogleDrive
+            </Button>
+          </div>
+        )}
+
+        {tokens !== undefined &&
+        tokens?.microsoftTokenObject?.isDriveAuthorize ? (
           <Button
             onClick={async () => {
-              handleOpenPicker();
+              pickerCode();
               setMediaParam({
                 video: false,
                 audio: false,
@@ -399,116 +521,48 @@ export default function AttachmentIcons({
             }}
           >
             <img
-              src={drivelogoImg.src}
+              alt="one drive picker"
+              src={oneDrivelogoImg.src}
               style={{
                 width: "100%",
                 height: "auto",
                 maxWidth: 20,
               }}
             />
-            Google Drive
+            OneDrive picker
           </Button>
-
-          <Tooltip text="With Google Drive Picker you can add attachments from your Google Drive account OR drag-drop files from your device using the upload feature.">
-            <span>
-              <BsInfoCircle color="#555" size={16} />
-            </span>
-          </Tooltip>
-        </div>
-      ) : (
-        <div className="wrap">
-          <Button
-            className="authButton"
-            onClick={async () => {
-              if (
-                googleTokenObject?.isTokenExpired &&
-                googleTokenObject?.isDriveVerfied
-              ) {
-                authService
-                  .getRefreshToken(
-                    googleTokenObject?.tokenObject?.refresh_token
-                  )
-                  .then((res) => {
-                    let temp = {
-                      isDriveAuthorize: true,
-                      isTokenExpired: false,
-                      tokenObject: res,
-                    };
-                    setgoogleTokenObject(temp);
-                    temp = {
-                      googleTokenObject: temp,
-                      microsoftTokenObject: microsoftTokenObject,
-                    };
-                    setTokenInfo(temp);
-                    openPickerClick();
-                    localStorage.setItem("tokenInfo", JSON.stringify(temp));
-                  })
-                  .catch((err) => {
-                    alert(err);
-                  });
-              } else {
-                googleDriveVerify();
-              }
-            }}
-          >
-            <img
-              src={drivelogoImg.src}
-              style={{
-                width: "100%",
-                height: "auto",
-                maxWidth: 20,
+        ) : (
+          <>
+            <Button
+              onClick={async () => {
+                connectToOneDrive();
+                setMediaParam({
+                  video: false,
+                  audio: false,
+                  selected: "",
+                  type: "",
+                });
               }}
-            />
-            Connect to GoogleDrive
-          </Button>
-        </div>
-      )}
-
-      {/* {tokens !== undefined && tokens.microsoftTokenObject?.isDriveAuthorize ? (
-        <Button
-          onClick={async () => {
-            pickerCode();
-            setMediaParam({
-              video: false,
-              audio: false,
-              selected: "",
-              type: "",
-            });
-          }}
-        >
-          <img
-            src={oneDrivelogoImg.src}
-            style={{
-              width: "100%",
-              height: "auto",
-              maxWidth: 20,
-            }}
-          />
-          OneDrive picker
-        </Button>
-      ) : (
-        <Button
-          onClick={async () => {
-            connectToOneDrive();
-            setMediaParam({
-              video: false,
-              audio: false,
-              selected: "",
-              type: "",
-            });
-          }}
-        >
-          <img
-            src={oneDrivelogoImg.src}
-            style={{
-              width: "100%",
-              height: "auto",
-              maxWidth: 20,
-            }}
-          />
-          Connect to OneDrive
-        </Button>
-      )} */}
+            >
+              <img
+                alt="connect to one drive"
+                src={oneDrivelogoImg.src}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxWidth: 20,
+                }}
+              />
+              Connect to OneDrive
+            </Button>
+            <Tooltip text="Please allow browser popups permissions for this application to upload/pick files from Onedrive">
+              <span>
+                <BsInfoCircle color="#555" size={16} />
+              </span>
+            </Tooltip>
+          </>
+        )}
+      </div>
     </StyledAttachmentIcons>
   );
 }

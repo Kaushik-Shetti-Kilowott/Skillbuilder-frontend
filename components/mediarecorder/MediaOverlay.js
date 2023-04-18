@@ -83,7 +83,7 @@ export default function MediaOverlay({
             {type === "audio" && (
               <AttachmentImage src={audioIcon.src} className="fallback" />
             )}
-            {(type === "file" || type === "pdf") && (
+            {(type === "file" || type === "pdf" || type === "onedrive") && (
               <AttachmentImage src={fileIcon.src} className="fallback" />
             )}
           </div>

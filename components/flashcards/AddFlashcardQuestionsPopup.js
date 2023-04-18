@@ -38,8 +38,7 @@ function AddFlashcardQuestionsPopup({
   const [isLoaded, setIsLoaded] = useState(false);
   const [checkedState, setCheckedState] = useState({});
   const [questionList, setQuestionList] = useState([]);
-  console.log(questions)
-  const { data: allQuestions,refetch:refetchQuest} = useQuery(
+  const { data: allQuestions, refetch: refetchQuest } = useQuery(
     ["questions", { teamId: team?.id, filters, searchString: searchKeyword }],
     () =>
       questionService.getAllQuestions({
@@ -105,17 +104,20 @@ function AddFlashcardQuestionsPopup({
       allQuestions?.data.filter((question) => question.status !== "Archived")
         ?.length
     );
-    if(show)
+    if (show) {
       refetchQuest();
-    
+    }
   }, [show]);
 
-  const checkBtnDisabled=()=>{
-    if(questionList.length === 0 || setTitle.trim() === "" || Object.values(checkedState).filter((item) => item === true).length === 0)
-    return true;
-      else
-    return false;
-  }
+  const checkBtnDisabled = () => {
+    if (
+      questionList.length === 0 ||
+      setTitle.trim() === "" ||
+      Object.values(checkedState).filter((item) => item === true).length === 0
+    )
+      return true;
+    else return false;
+  };
 
   return (
     <Modal
@@ -183,35 +185,37 @@ function AddFlashcardQuestionsPopup({
         <div className="card-content">
           {isLoaded && allQuestions?.data.length > 0 && (
             <div className="questions">
-              {allQuestions?.data.filter((question) => question.status !== "Archived").map((questionMeta, index) => (
-                <CardMain key={`popupCheckbox-${questionMeta?.id}`}>
-                  <div className="meta1 d-flex">
-                    <Checkbox
-                      id={`custom-checkbox-${questionMeta?.id}`}
-                      name={`custom-checkbox-${questionMeta?.id}`}
-                      checked={checkedState[questionMeta?.id]}
-                      onChange={(e) => handleOnChange(e, questionMeta?.id)}
-                      disabled={questionMeta?.status === "Archived"}
-                    />
-                    <SerialNumberUI value={questionMeta?.number} />
-                  </div>
-                  <div className="meta2">
-                    <p className="questionContent">
-                      {questionMeta?.questionText}
-                    </p>
-                    <Author
-                      author={questionMeta?.author}
-                      createdAt={questionMeta?.createdAt}
-                    />
-                    <BlankDiv />
-                    <Labels
-                      labels={questionMeta?.labels}
-                      questionId={questionMeta?.id}
-                      showAddLabel={false}
-                    />
-                  </div>
-                </CardMain>
-              ))}
+              {allQuestions?.data
+                .filter((question) => question.status !== "Archived")
+                .map((questionMeta, index) => (
+                  <CardMain key={`popupCheckbox-${questionMeta?.id}`}>
+                    <div className="meta1 d-flex">
+                      <Checkbox
+                        id={`custom-checkbox-${questionMeta?.id}`}
+                        name={`custom-checkbox-${questionMeta?.id}`}
+                        checked={checkedState[questionMeta?.id]}
+                        onChange={(e) => handleOnChange(e, questionMeta?.id)}
+                        disabled={questionMeta?.status === "Archived"}
+                      />
+                      <SerialNumberUI value={questionMeta?.number} />
+                    </div>
+                    <div className="meta2">
+                      <p className="questionContent">
+                        {questionMeta?.questionText}
+                      </p>
+                      <Author
+                        author={questionMeta?.author}
+                        createdAt={questionMeta?.createdAt}
+                      />
+                      <BlankDiv />
+                      <Labels
+                        labels={questionMeta?.labels}
+                        questionId={questionMeta?.id}
+                        showAddLabel={false}
+                      />
+                    </div>
+                  </CardMain>
+                ))}
             </div>
           )}
           <div className="card-footer d-flex justify-content-between align-items-center mt-2">

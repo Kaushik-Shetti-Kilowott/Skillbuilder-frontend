@@ -26,13 +26,9 @@ function TokensContextProvider(props) {
     () => authService.getUserTokens(),
     {
       enabled: !!auth?.token && !!team?.id,
-      onSuccess: (res) => {
-        console.log("tokens query", res.data);
-      },
+
       onError: (error) => {
-        if (!router.asPath.includes("invite")) {
-          Bus.emit("error", { operation: "open", error: error.response });
-        }
+        Bus.emit("error", { operation: "open", error: error.response });
       },
     }
   );

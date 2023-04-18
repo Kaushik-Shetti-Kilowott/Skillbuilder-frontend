@@ -25,7 +25,7 @@ const {
 
 export default function AnswerEditor() {
   const formik = useFormikContext();
-  const { tokens, refetchTokens, setTokens } = useTokens();
+  const { tokens, refetchTokens } = useTokens();
   const [openPicker, authResponse] = useDrivePicker();
   const [mediaSelection, setMediaSelection] = useState({
     video: false,
@@ -37,30 +37,14 @@ export default function AnswerEditor() {
     formik.values.attachment ? formik.values.attachment : []
   );
 
-  const [tokenInfo, setTokenInfo] = useState(tokens? tokens: null);
-  const [googleTokenObject, setgoogleTokenObject] = useState(tokenInfo? tokens.googleTokenObject : null);
-
-  const [microsoftTokenObject, setMicrosoftTokenObject] = useState(tokenInfo? tokens.microsoftTokenObject: null);
-
   const [disableIcons, setDisableIcons] = useState(false);
 
   const validatePickerClick = () => {
-    if (googleTokenObject?.isTokenExpired) {
+    if (tokens?.googleTokenObject?.isTokenExpired) {
       authService
-        .getRefreshToken(googleTokenObject?.tokenObject?.refresh_token)
-        .then((res) => {
+        .getRefreshToken(tokens?.googleTokenObject?.tokenObject?.refresh_token)
+        .then(() => {
           refetchTokens();
-          let temp = {
-            isDriveAuthorize: true,
-            isTokenExpired: false,
-            tokenObject: res,
-          };
-          setgoogleTokenObject(temp);
-          temp = {
-            googleTokenObject: temp,
-            microsoftTokenObject: microsoftTokenObject,
-          };
-          setTokenInfo(temp);
           openPickerClick();
         })
         .catch((error) => {
@@ -91,20 +75,18 @@ export default function AnswerEditor() {
       "application/vnd.openxmlformats-officedocument.presentationml.presentation",
       "application/vnd.google-apps.spreadsheet",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "onedrive",
     ];
     let dataObj = [];
-    if (atype == "google") dataObj = data.docs;
-    else dataObj = data.value;
-
+    if (atype == "Google") dataObj = data.docs;
+    else dataObj = data;
     if (dataObj.length > 0) {
-      let fileIds = [];
       let fileObjs = [];
       let formikObj = [];
-      dataObj.map((fileItem, key) => {
-        let mFile = "";
-        if (atype == "onedrive") mFile = oneDriveTransformer(fileItem);
-        else mFile = fileItem;
+      let fileData = [];
 
+      dataObj.map((fileItem, key) => {
+        let mFile = fileItem;
         if (allowedMimeTypes.includes(mFile.mimeType)) {
           const copy = answerAttachment.filter((e) => {
             if (e.id !== mFile.id) {
@@ -123,23 +105,23 @@ export default function AnswerEditor() {
         }
       });
       fileObjs.forEach((el) => {
-        fileIds = [...fileIds, el.id];
+        fileData = [...fileData, { id: el.id, name: el.name }];
         formikObj = [
           ...formikObj,
           {
             id: el.id,
             mimeType: el.mimeType,
             name: el.name,
-            url: el.url !== undefined ? el.url : "",
+            shareId: atype === "Google" ? el.id : el.shareId,
             type: atype,
           },
         ];
       });
 
       formik.setFieldValue("attachment", formikObj);
-      if (fileIds.length > 0 && atype == "google")
+      if (atype == "Google" && fileData.length > 0)
         answerService
-          .grantAccess(fileIds)
+          .grantAccess(fileData, "Google")
           .then((res) => {})
           .catch((error) => {
             Bus.emit("error", {
@@ -156,9 +138,9 @@ export default function AnswerEditor() {
       developerKey: "AIzaSyDoqS6OiXvYLXmv0HWlHuosHEbPQ-Cie0E",
       viewId: "DOCS",
       token:
-        googleTokenObject?.tokenObject &&
-        googleTokenObject?.tokenObject?.access_token
-          ? googleTokenObject?.tokenObject?.access_token
+        tokens?.googleTokenObject?.tokenObject &&
+        tokens?.googleTokenObject?.tokenObject?.access_token
+          ? tokens?.googleTokenObject?.tokenObject?.access_token
           : "",
       showUploadView: true,
       showUploadFolders: false,
@@ -170,7 +152,7 @@ export default function AnswerEditor() {
           elements[i].style.zIndex = "2000";
         }
         if (data.docs) {
-          handleAttachment(data, "google");
+          handleAttachment(data, "Google");
         }
       },
     });
@@ -200,15 +182,6 @@ export default function AnswerEditor() {
                   setMediaParam={setMediaSelection}
                   disableIcons={disableIcons}
                   handleAttachment={handleAttachment}
-                  tokenInfo={tokenInfo}
-                  setTokenInfo={setTokenInfo}
-                  googleTokenObject={googleTokenObject}
-                  setgoogleTokenObject={setgoogleTokenObject}
-                  microsoftTokenObject={microsoftTokenObject}
-                  setMicrosoftTokenObject={setMicrosoftTokenObject}
-                  refetchTokens={refetchTokens}
-                  tokens={tokens}
-                  setTokens={setTokens}
                 />
               </GoogleOAuthProvider>
               <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
@@ -218,13 +191,6 @@ export default function AnswerEditor() {
                   attachments={answerAttachment}
                   setAttachments={setanswerAttachment}
                   setDisableIcons={setDisableIcons}
-                  tokenInfo={tokenInfo}
-                  setTokenInfo={setTokenInfo}
-                  googleTokenObject={googleTokenObject}
-                  setgoogleTokenObject={setgoogleTokenObject}
-                  microsoftTokenObject={microsoftTokenObject}
-                  setMicrosoftTokenObject={setMicrosoftTokenObject}
-                  refetchTokens={refetchTokens}
                 />
               </GoogleOAuthProvider>
               <AttachmentList

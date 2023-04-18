@@ -79,9 +79,13 @@ function AuthContextProvider(props) {
 
     if (typeof callback === "function") callback();
     else {
-      if (auth?.user?.lastTeamVisitedId) {
+      if (auth?.user?.lastTeamVisitedId && !router.asPath.includes("invite")) {
         logout({
           returnTo: window.location.origin
+        });
+      } else {
+        logout({
+          localOnly:true
         });
       }
     }

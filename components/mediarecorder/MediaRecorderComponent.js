@@ -7,14 +7,13 @@ import {
   BsFillCameraVideoOffFill,
   BsFillCameraVideoFill,
 } from "react-icons/bs";
-import Tooltip from "@ui-library/Tooltip";
 import styled from "styled-components";
-import { useGoogleLogin } from "@react-oauth/google";
-import { hasGrantedAnyScopeGoogle } from "@react-oauth/google";
+import { useGoogleLogin,hasGrantedAnyScopeGoogle } from "@react-oauth/google";
 import { useAuthUser } from "@contexts/AuthContext";
 import authService from "@services/auth.service";
 import answerService from "@services/answer.service";
 import { useFormikContext } from "formik";
+import { useTokens } from "@contexts/TokensContext";
 import Bus from "@utils/Bus";
 import { Modal as BsModal } from "react-bootstrap";
 import { IoIosCloseCircleOutline as CloseIcon } from "react-icons/io";
@@ -31,13 +30,6 @@ const Recorder = ({
   selection,
   setMediaParam,
   setDisableIcons,
-  tokenInfo,
-  setTokenInfo,
-  googleTokenObject,
-  setgoogleTokenObject,
-  microsoftTokenObject,
-  setMicrosoftTokenObject,
-  refetchTokens,
 }) => {
   const videoRef = useRef(null);
   const testvideo = useRef(null);
@@ -45,7 +37,7 @@ const Recorder = ({
   const formik = useFormikContext();
 
   const { auth, user } = useAuthUser();
-
+  const { tokens, refetchTokens } = useTokens();
   const [playState, setplayState] = useState(true);
   const [pauseState, setpauseState] = useState(false);
   const [resumeState, setresumeState] = useState(false);
@@ -76,19 +68,8 @@ const Recorder = ({
     onSuccess: (codeResponse) => {
       authService
         .getToken(codeResponse.code)
-        .then((res) => {
+        .then(() => {
           refetchTokens();
-          let temp = {
-            isDriveAuthorize: true,
-            isTokenExpired: false,
-            tokenObject: res.data,
-          };
-          setgoogleTokenObject(temp);
-          temp = {
-            googleTokenObject: temp,
-            microsoftTokenObject: microsoftTokenObject,
-          };
-          setTokenInfo(temp);
         })
         .catch((error) => {
           Bus.emit("error", {
@@ -115,14 +96,12 @@ const Recorder = ({
   const [settings, setSettings] = useState(constraints);
 
   const {
-    status,
     startRecording,
     pauseRecording,
     resumeRecording,
     stopRecording,
     muteAudio,
     unMuteAudio,
-    mediaBlobUrl,
     previewStream,
     clearBlobUrl,
   } = useReactMediaRecorder({
@@ -170,15 +149,23 @@ const Recorder = ({
       formData.append("file", newFile);
 
       clearBlobUrl();
-      if (tokenInfo != undefined) {
-        const hasAccess = hasGrantedAnyScopeGoogle(
-          googleTokenObject?.tokenObject,
-          "https://www.googleapis.com/auth/drive"
-        );
+      if (tokens !== undefined) {
+        const hasAccess =
+          auth?.user?.authType === "Microsoft"
+            ? true
+            : hasGrantedAnyScopeGoogle(
+                tokens?.googleTokenObject?.tokenObject,
+                "https://www.googleapis.com/auth/drive"
+              );
         formData.append(
           "token",
-          JSON.stringify(googleTokenObject?.tokenObject)
+          JSON.stringify(
+            auth?.user?.authType === "Microsoft"
+              ? tokens?.microsoftTokenObject?.tokenObject?.uploadToken
+              : tokens?.googleTokenObject?.tokenObject
+          )
         );
+        formData.append("type", auth?.user?.authType);
         if (hasAccess) {
           if (newFile) {
             answerService
@@ -186,8 +173,13 @@ const Recorder = ({
               .then((res) => {
                 const mfile = {
                   id: res.id,
-                  mimeType: blobObject.type,
+                  mimeType:
+                    auth?.user?.authType === "Microsoft"
+                      ? "onedrive"
+                      : blobObject.type,
                   name: fileName,
+                  shareId:
+                    auth?.user?.authType === "Microsoft" ? res.shareId : res.id,
                 };
                 setAttachments([...attachments, mfile]);
                 const copy1 = [...attachments, mfile];
@@ -196,6 +188,7 @@ const Recorder = ({
                     id: el.id,
                     mimeType: el.mimeType,
                     name: el.name,
+                    shareId: el.shareId,
                   };
                 });
                 formik.setFieldValue("attachment", copy2);
@@ -272,7 +265,10 @@ const Recorder = ({
           init && getDevices();
         })
         .catch(function (error) {
-          console.log("Something went wrong!");
+          Bus.emit("error", {
+            operation: "open",
+            error: "Something went wrong!",
+          });
         });
     } else {
       //might be required in future
@@ -391,7 +387,10 @@ const Recorder = ({
       .enumerateDevices()
       .then(gotDevices)
       .catch((error) => {
-        console.log(error);
+        Bus.emit("error", {
+          operation: "open",
+          error: error,
+        });
       });
   };
 

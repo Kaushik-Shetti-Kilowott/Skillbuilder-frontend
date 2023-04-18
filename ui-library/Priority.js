@@ -18,8 +18,11 @@ const Wrapper = styled.div`
   padding-right: 8px;
   padding-top: 4px;
   padding-bottom: 4px;
-  margin-right: 20px;
   margin-bottom: 10px;
+  margin-right: 10px;
+  @media only screen and (max-width: 490px) {
+    white-space: nowrap;
+  }
   ${Text} {
     margin-left: ${(props) => (props.filled ? "0" : "4px")};
   }
@@ -29,6 +32,9 @@ const Label = styled(Text)`
   font-style: normal;
   font-weight: 500;
   font-size: 20px;
+  @media only screen and (max-width: 490px) {
+    font-size: 16px;
+  }
   line-height: 24px;
   text-align: center;
   color: ${(props) => props.color};

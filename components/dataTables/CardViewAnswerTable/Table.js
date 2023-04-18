@@ -209,7 +209,7 @@ const TableWrapper = styled.div`
 
     th:nth-child(3),
     th:nth-child(4) {
-      width: 140px;
+      width: 145px;
     }
   }
 

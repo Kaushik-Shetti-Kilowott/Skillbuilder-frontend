@@ -10,6 +10,7 @@ const StyledCard = styled.div`
     background: #ffffff;
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.15);
     border-radius: 5px;
+    margin: 0 12px;
 
     .card-header,
     .card-footer {
@@ -79,6 +80,9 @@ const AnswersCount = styled.div`
   font-style: normal;
   font-weight: 600;
   font-size: 20px;
+  @media only screen and (max-width: 490px) {
+    font-size: 16px;
+  }
   line-height: 24px;
   color: #003647;
 `;
@@ -97,7 +101,7 @@ const QuestionCard = ({ question }) => {
                   importance={question?.importance}
                   filled={true}
                   showShowFullLabel={true}
-                  linebreak={true}
+                  linebreak={false}
                 />
 
                 <Tag>

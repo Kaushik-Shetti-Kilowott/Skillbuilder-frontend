@@ -27,7 +27,7 @@ export default function ManagePageHeader() {
       options.push({ name: "Accounts", value: "/manage/accounts" });
     }
 
-    if (isSuperAdmin||isAdmin) {
+    if (isSuperAdmin || isAdmin) {
       options.push(
         { name: "Users", value: "/manage/users" },
         { name: "Team Profile", value: "/manage/team" },
@@ -37,8 +37,6 @@ export default function ManagePageHeader() {
       );
     }
 
-    options.push({ name: "Logout", value: "/logout" });
-
     return options;
   }, [isAdmin, isSuperAdmin]);
 
@@ -47,22 +45,21 @@ export default function ManagePageHeader() {
     return option?.value ?? "/manage/profile";
   }, [path, options]);
 
-  useEffect(() => { 
+  useEffect(() => {
     const storageEventHandler = () => {
-      let flag = localStorage.getItem('isSuperAdminView') === 'true' ? true:false;
+      let flag =
+        localStorage.getItem("isSuperAdminView") === "true" ? true : false;
       setadminStrip(flag);
     };
 
-    window.addEventListener('storage', storageEventHandler, false);
+    window.addEventListener("storage", storageEventHandler, false);
     storageEventHandler();
-    if (router.asPath.includes("accounts")){
-      localStorage.removeItem('superAdminTeam');
-      localStorage.removeItem('isSuperAdminView');
+    if (router.asPath.includes("accounts")) {
+      localStorage.removeItem("superAdminTeam");
+      localStorage.removeItem("isSuperAdminView");
       setadminStrip(false);
     }
   }, []);
-
-  
 
   return (
     <Wrapper className="mb-3 mb-lg-5">
@@ -79,21 +76,20 @@ export default function ManagePageHeader() {
               Questions
             </NavButton>
 
-            {!adminStrip &&(
+            {!adminStrip && (
               <NavButton
-              active={path.includes("profile")}
-              onClick={() => {
-                router.push("/manage/profile");
-                // router.reload();
-                // refetchAuthUser();
-              }}
+                active={path.includes("profile")}
+                onClick={() => {
+                  router.push("/manage/profile");
+                  // router.reload();
+                  // refetchAuthUser();
+                }}
               >
                 My Profile
               </NavButton>
             )}
-           
 
-            <Authorization allow={["admin","superadmin"]}>
+            <Authorization allow={["admin", "superadmin"]}>
               <NavButton
                 active={path.includes("users")}
                 onClick={() =>
@@ -106,7 +102,7 @@ export default function ManagePageHeader() {
               </NavButton>
             </Authorization>
 
-            <Authorization allow={["admin","superadmin"]}>
+            <Authorization allow={["admin", "superadmin"]}>
               <NavButton
                 active={path.endsWith("team")}
                 onClick={() => router.push("/manage/team")}
@@ -115,7 +111,7 @@ export default function ManagePageHeader() {
               </NavButton>
             </Authorization>
 
-            <Authorization allow={["admin","superadmin"]}>
+            <Authorization allow={["admin", "superadmin"]}>
               <NavButton
                 active={path.includes("billing")}
                 onClick={() => router.push("/manage/billing")}
@@ -124,7 +120,7 @@ export default function ManagePageHeader() {
               </NavButton>
             </Authorization>
 
-            <Authorization allow={["admin","superadmin"]}>
+            <Authorization allow={["admin", "superadmin"]}>
               <NavButton
                 active={path.includes("invoices")}
                 onClick={() => router.push("/manage/invoices")}
@@ -133,14 +129,13 @@ export default function ManagePageHeader() {
               </NavButton>
             </Authorization>
 
-            <div className="flex-grow-1" />
             <NavButton
               active={path.includes("activity")}
               onClick={() => router.push(`/manage/activity`)}
             >
               Activity
             </NavButton>
-            {!adminStrip &&(
+            {!adminStrip && (
               <Authorization allow={["superadmin"]}>
                 <NavButton style={{ cursor: "auto" }}> | </NavButton>
 
@@ -152,8 +147,6 @@ export default function ManagePageHeader() {
                 </NavButton>
               </Authorization>
             )}
-            
-            <LogoutButton onClick={handlelogout}>Log Out</LogoutButton>
           </Col>
           <Col className="d-flex d-lg-none align-items-center">
             {!isSuperAdmin && <Team>{team?.teamName}</Team>}
@@ -199,14 +192,6 @@ const OptionsWrapper = styled.div`
   align-items: center;
 `;
 
-const LogoutButton = styled(ButtonOutlined)`
-  font-size: 22px !important;
-  padding: 0.5rem 2rem !important;
-  &:hover svg {
-    fill: #fff;
-  }
-`;
-
 const NavButton = styled.span`
   font-family: "Barlow Condensed", sans-serif;
   font-style: normal;
@@ -234,4 +219,3 @@ const Team = styled.span`
   text-overflow: ellipsis;
   max-width: 300px;
 `;
-

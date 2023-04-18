@@ -199,7 +199,7 @@ export default function InviteVerificationPage() {
       </Modal>
       <Background className="bs">
         <Header team={inviteQuery.data?.invitedTeam} />
-        <Image src={"/images/invite-page-blur-image.jpg"} alt="background" />
+        <Image layout="fill" src={"/images/invite-page-blur-image.jpg"} alt="background" />
       </Background>
     </>
   );

@@ -84,8 +84,11 @@ const answerService = {
     const res = await axios.post("/file-upload", formData);
     return res.data;
   },
-  grantAccess: async (data) => {
-    const res = await axios.post(`/public-access`, { fileIds: data });
+  grantAccess: async (data, type) => {
+    const res = await axios.post(`/public-access`, {
+      fileData: data,
+      type: type,
+    });
     return res.data;
   },
 };

@@ -12,6 +12,17 @@ import teamService from "@services/team.service";
 import flashcardService from "@services/flashcard.service";
 import Bus from "@utils/Bus";
 
+const getPopupTitle = (type)=>{
+  const message =
+    {
+      "Team" : "Are you sure you want to join the Team?",
+      "Question" : "Are you sure you want to answer the Question?",
+      "Flashcard" : "Are you sure you want to join the Flashcard?",
+    }[type] ?? "Are you sure?";
+
+  return message;
+}
+
 export default function NotificationItem({
   image,
   text,
@@ -179,8 +190,14 @@ export default function NotificationItem({
                             archiveFlashcardMutation.mutate({
                               teamId: teamId,
                               flashcardSetId: flashcardSetId,
-                              data: { status: "Approved",
-                              isActingSuperAdmin: localStorage.getItem('isSuperAdminView') === 'true' ? true:false },
+                              data: {
+                                status: "Approved",
+                                isActingSuperAdmin:
+                                  localStorage.getItem("isSuperAdminView") ===
+                                  "true"
+                                    ? true
+                                    : false,
+                              },
                             });
                           }}
                           onCancel={() => archiveAlert.close()}
@@ -212,7 +229,7 @@ export default function NotificationItem({
               onClick={() => {
                 const adminAlert = alert.show(
                   <ConfirmAlert
-                    title={"Are you sure?"}
+                    title={getPopupTitle(invite.type)}
                     // message={"You are Accepting the invite "}
                     onDone={() => {
                       inviteMutation

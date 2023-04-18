@@ -12,56 +12,43 @@ import {
 } from "react-icons/io";
 
 const audioPopover = (file) => {
-  let isOneDrive = Object.values(file).indexOf('onedrive') > 0 ? true:false;// eslint-ignore-line
   return (
     <StyledPopover id={`popover-basic-${file.id}`}>
       <Popover.Header as="h4">
         {file.name}
-        {!isOneDrive && (// eslint-ignore-line
-          <a
+        <a
           href={`https://drive.google.com/uc?id=${file.id}&export=download`}
           style={{ float: "right", marginTop: "2px" }}
-          >
+        >
           <MdOutlineDownloadForOffline color="#393D3E" size={20} />
-          </a>
-        )}
+        </a>
       </Popover.Header>
       <Popover.Body>
-        {!isOneDrive ? (// eslint-ignore-line
-          <audio
-            controls
-            src={`https://drive.google.com/uc?export=preview&confirm=1&id=${file.id}`}
-            type={file.mimeType}
-          >
-            {file.name}
-          </audio>
-        ):(
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        )}
+        <audio
+          controls
+          src={`https://drive.google.com/uc?export=preview&confirm=1&id=${file.id}`}
+          type={file.mimeType}
+        >
+          {file.name}
+        </audio>
       </Popover.Body>
     </StyledPopover>
   );
 };
 
 const videoPopover = (file) => {
-  let isOneDrive = Object.values(file).indexOf('onedrive') > 0 ? true:false;// eslint-ignore-line
   return (
     <StyledPopover id={`popover-basic-${file.id}`}>
       <Popover.Header as="h4">
         {file.name}
-        {!isOneDrive && (
-          <a
-            href={`https://drive.google.com/uc?id=${file.id}&export=download`}
-            style={{ float: "right", marginTop: "2px" }}
-          >
-            <MdOutlineDownloadForOffline color="#393D3E" size={20} />
-          </a>
-        )}
+        <a
+          href={`https://drive.google.com/uc?id=${file.id}&export=download`}
+          style={{ float: "right", marginTop: "2px" }}
+        >
+          <MdOutlineDownloadForOffline color="#393D3E" size={20} />
+        </a>
       </Popover.Header>
       <Popover.Body>
-      {!isOneDrive ? (// eslint-ignore-line
         <video
           controls
           width={300}
@@ -71,102 +58,88 @@ const videoPopover = (file) => {
         >
           {file.name}
         </video>
-        ):(
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        )}
       </Popover.Body>
     </StyledPopover>
   );
 };
 
 const imagePopover = (file) => {
-  let isOneDrive = Object.values(file).indexOf('onedrive') > 0 ? true:false;// eslint-ignore-line
   return (
     <StyledPopover id={`popover-basic-${file.id}`}>
       <Popover.Header as="h4">
         {file.name}
-        {!isOneDrive && (// eslint-ignore-line
-          <a
-            href={`https://drive.google.com/uc?id=${file.id}&export=download`}
-            style={{ float: "right", marginTop: "2px" }}
-          >
-            <MdOutlineDownloadForOffline color="#393D3E" size={20} />
-          </a>
-        )}
+        <a
+          href={`https://drive.google.com/uc?id=${file.id}&export=download`}
+          style={{ float: "right", marginTop: "2px" }}
+        >
+          <MdOutlineDownloadForOffline color="#393D3E" size={20} />
+        </a>
       </Popover.Header>
       <Popover.Body>
-      {!isOneDrive ? (// eslint-ignore-line
         <img
           id={`image-${file.id}`}
           name="image"
           alt={`image-${file.id}`}
           src={`https://drive.google.com/uc?export=preview&confirm=1&id=${file.id}`}
         />
-        ):(
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        )}
       </Popover.Body>
     </StyledPopover>
   );
 };
 
 const pdfPopover = (file) => {
-  let isOneDrive = Object.values(file).indexOf('onedrive') > 0 ? true:false;// eslint-ignore-line
   return (
     <StyledPopover id={`popover-basic-${file.id}`}>
       <Popover.Header as="h4">
         {file.name}
-        {!isOneDrive && (
-          <a
-            href={`https://drive.google.com/uc?id=${file.id}&export=download`}
-            style={{ float: "right", marginTop: "2px" }}
-          >
-            <MdOutlineDownloadForOffline color="#393D3E" size={20} />
-          </a>
-        )}
+        <a
+          href={`https://drive.google.com/uc?id=${file.id}&export=download`}
+          style={{ float: "right", marginTop: "2px" }}
+        >
+          <MdOutlineDownloadForOffline color="#393D3E" size={20} />
+        </a>
       </Popover.Header>
       <Popover.Body>
-      {!isOneDrive ? (// eslint-ignore-line
-          <a
-            href={`https://drive.google.com/uc?export=preview&confirm=1&id=${file.id}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {file.name}
-          </a>
-        ):(
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        )}
+        <a
+          href={`https://drive.google.com/uc?export=preview&confirm=1&id=${file.id}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {file.name}
+        </a>
       </Popover.Body>
     </StyledPopover>
   );
 };
 
 const filePopover = (file) => {
-  let isOneDrive = Object.values(file).indexOf('onedrive') > 0 ? true:false;// eslint-ignore-line
   return (
     <StyledPopover id={`popover-basic-${file.id}`}>
       <Popover.Header as="h4">{file.name}</Popover.Header>
       <Popover.Body>
-        {!isOneDrive ? (// eslint-ignore-line
-          <a
-            href={`https://drive.google.com/file/d/${file.id}/view?usp=sharing`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {file.name}
-          </a>
-        ):(
-          <a href={file.url} target="_blank" rel="noopener noreferrer">
-            {file.name}
-          </a>
-        )}
+        <a
+          href={`https://drive.google.com/file/d/${file.id}/view?usp=sharing`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {file.name}
+        </a>
+      </Popover.Body>
+    </StyledPopover>
+  );
+};
+const onedrivePopover = (file) => {
+  return (
+    <StyledPopover id={`popover-basic-${file.id}`}>
+      <Popover.Header as="h4">{file.name}</Popover.Header>
+      <Popover.Body>
+        <a
+          href={`https://1drv.ms/${file.shareId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {file.name}
+        </a>
       </Popover.Body>
     </StyledPopover>
   );
@@ -221,9 +194,10 @@ const AttachmentList = ({
       case "application/vnd.google-apps.spreadsheet":
       case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
         return [filePopover, "file"];
+      case "onedrive":
+        return [onedrivePopover, "onedrive"];
       default:
         return [filePopover, "file"];
-
     }
   };
 
@@ -268,9 +242,7 @@ const AttachmentList = ({
             isFromEditor={isFromEditor}
             arrows={arrows}
           >
-            
             {attachments?.map((file) => (
-              
               <>
                 <MediaOverlay
                   key={file.id}
