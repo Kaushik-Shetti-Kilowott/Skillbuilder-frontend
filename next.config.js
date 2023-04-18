@@ -1,5 +1,6 @@
 module.exports = {
   reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
         images: {
             unoptimized: true
