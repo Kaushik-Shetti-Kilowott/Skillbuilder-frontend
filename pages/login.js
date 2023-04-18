@@ -30,13 +30,14 @@ export function Login() {
       }
     }
   }, [auth]);
-  //Added img relative path
+
   return (
     <Container className="bs">
       <Row>
         <Col className="vh-100 d-flex justify-content-center align-items-center">
           <SignInCard>
-          <Image src="public/svgs/skillbuilder-logo-dark.svg" alt="placeholder text" /> 
+            <img src={SkillbuilderLogoDark} alt="Skillbuilder" />
+
             <p className="mt-4"></p>
             <LoginGrid>
               <Auth0SignIn />

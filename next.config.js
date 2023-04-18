@@ -15,5 +15,6 @@ module.exports = {
   },
   images: {
     domains: ['main.d21h2ko0ro2f7y.amplifyapp.com'],
+    formats: ['image/svg','image/png','image/avif', 'image/webp'],
   },
 };
