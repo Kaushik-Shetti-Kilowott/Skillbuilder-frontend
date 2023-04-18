@@ -1,0 +1,8 @@
+version: "2"
+services:
+ skillbuilder-app:
+   image: 954253826382.dkr.ecr.us-east-1.amazonaws.com/skillbuilder-ui:CONTAINER_TAG
+   ports:
+   - 3000:80
+  # - 8443:443
+   restart: always
