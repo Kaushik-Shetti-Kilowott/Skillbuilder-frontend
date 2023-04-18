@@ -13,8 +13,5 @@ module.exports = {
       process.env.NEXT_PUBLIC_WEBFLOW_URL ||
       "https://landing-page-ac72bc.webflow.io",
   },
-  images: {
-    domains: ['main.d21h2ko0ro2f7y.amplifyapp.com'],
-    formats: ['image/svg','image/png','image/avif', 'image/webp'],
-  },
+  images: { domains: ['main.d21h2ko0ro2f7y.amplifyapp.com'],formats: ['image/svg','image/png'], },
 };
