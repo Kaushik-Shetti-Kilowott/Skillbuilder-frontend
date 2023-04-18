@@ -12,5 +12,13 @@ module.exports = {
     WEBFLOW_URL:
       process.env.NEXT_PUBLIC_WEBFLOW_URL ||
       "https://landing-page-ac72bc.webflow.io",
+  },//Added img protocols
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
   },
 };
