@@ -53,7 +53,7 @@ export function Login() {
           </SignInCard>
         </Col>
         <Col className="d-flex justify-content-center align-items-center">
-          <Image src={placeholderTextImg} alt="placeholder text" />
+          <img src={placeholderTextImg.src} alt="placeholder text" />
         </Col>
       </Row>
     </Container>
