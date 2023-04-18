@@ -36,7 +36,7 @@ export function Login() {
       <Row>
         <Col className="vh-100 d-flex justify-content-center align-items-center">
           <SignInCard>
-            <img src={SkillbuilderLogoDark} alt="Skillbuilder" />
+            <img src={SkillbuilderLogoDark.src} alt="Skillbuilder" />
 
             <p className="mt-4"></p>
             <LoginGrid>
