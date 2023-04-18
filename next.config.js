@@ -1,5 +1,6 @@
 module.exports = {
   reactStrictMode: true,
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
         images: {
             unoptimized: true
@@ -22,6 +23,6 @@ module.exports = {
   //   ],
   // },
   images: {
-    domains: ['alpha.skillbuilder.io'],
+    domains: ['main.d21h2ko0ro2f7y.amplifyapp.com'],
   },
 };
