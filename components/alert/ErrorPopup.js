@@ -72,7 +72,7 @@ export default function ErrorPopup({ show = false, setVisibility, error }) {
       router.push("/");
     }
   };
-
+//default
   return (
     <Modal
       className="bs"
